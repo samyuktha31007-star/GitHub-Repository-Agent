@@ -1,0 +1,19 @@
+{
+  "name": "sample-ecommerce-api",
+  "version": "1.2.0",
+  "description": "Demonstration RESTful API for repository analysis and security auditing",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

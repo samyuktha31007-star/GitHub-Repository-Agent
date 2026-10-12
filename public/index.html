@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Repository Agent | Comprehensive Code & Security Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+  <div id="app-container">
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-title">Repo Agent</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Core</div>
+        <a class="nav-item active" data-view="dashboard">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" data-view="add-repo">
+          <span class="nav-icon">➕</span>
+          <span>Add Repository</span>
+        </a>
+        <a class="nav-item" data-view="overview">
+          <span class="nav-icon">ℹ️</span>
+          <span>Overview</span>
+        </a>
+        <a class="nav-item" data-view="structure">
+          <span class="nav-icon">📁</span>
+          <span>Project Structure</span>
+        </a>
+
+        <div class="nav-section-title">Audit & Quality</div>
+        <a class="nav-item" data-view="code-analysis">
+          <span class="nav-icon">🔍</span>
+          <span>Code Analysis</span>
+        </a>
+        <a class="nav-item" data-view="bug-reports">
+          <span class="nav-icon">🐛</span>
+          <span>Bug Reports</span>
+          <span class="nav-badge badge-amber" id="nav-bugs-badge">0</span>
+        </a>
+        <a class="nav-item" data-view="security">
+          <span class="nav-icon">🛡️</span>
+          <span>Security Analysis</span>
+          <span class="nav-badge badge-red" id="nav-security-badge">0</span>
+        </a>
+        <a class="nav-item" data-view="dependencies">
+          <span class="nav-icon">📦</span>
+          <span>Dependencies</span>
+        </a>
+
+        <div class="nav-section-title">AI & Generation</div>
+        <a class="nav-item" data-view="doc-gen">
+          <span class="nav-icon">📝</span>
+          <span>Doc Generator</span>
+        </a>
+        <a class="nav-item" data-view="chatbot">
+          <span class="nav-icon">💬</span>
+          <span>Repo Chatbot</span>
+        </a>
+
+        <div class="nav-section-title">Delivery</div>
+        <a class="nav-item" data-view="reports">
+          <span class="nav-icon">📄</span>
+          <span>PDF Reports</span>
+        </a>
+        <a class="nav-item" data-view="settings">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <span id="system-status-text">Engine Ready</span>
+        </div>
+        <button id="theme-toggle-btn" class="btn-icon" title="Toggle Dark/Light Mode">☀️</button>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div id="main-wrapper">
+      <!-- Top Header -->
+      <header id="top-header">
+        <div class="header-left">
+          <button id="mobile-toggle" class="btn-icon mobile-menu-btn">☰</button>
+          <div class="repo-selector-wrapper">
+            <span>📦</span>
+            <select id="repo-select-dropdown" class="repo-select">
+              <option value="" disabled selected>No repository loaded</option>
+            </select>
+          </div>
+        </div>
+        <div class="header-right">
+          <button id="header-add-repo-btn" class="btn btn-secondary">
+            <span>➕</span>
+            <span>New Repo</span>
+          </button>
+          <button id="header-download-pdf-btn" class="btn btn-primary">
+            <span>📥</span>
+            <span>Download PDF</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Viewport -->
+      <main id="content-viewport">
+
+        <!-- 1. DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view-section active">
+          <div class="page-header">
+            <h1 class="page-title"><span>📊</span> Repository Dashboard</h1>
+            <p class="page-description">High-level code intelligence, quality metrics, and security health status.</p>
+          </div>
+
+          <div id="dashboard-empty" class="empty-state">
+            <div class="empty-icon">📂</div>
+            <h3 class="empty-title">No Active Repository</h3>
+            <p class="empty-subtitle">Connect a public GitHub URL, upload a repository ZIP, or drag individual code files to generate a comprehensive analysis.</p>
+            <button class="btn btn-primary" onclick="App.navigateTo('add-repo')">Add Repository Now</button>
+          </div>
+
+          <div id="dashboard-content" style="display: none;">
+            <!-- Top Metric Cards -->
+            <div class="grid-cards">
+              <div class="metric-card">
+                <div class="metric-icon" style="background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan);">📁</div>
+                <div class="metric-info">
+                  <span class="metric-value" id="dash-files-count">0</span>
+                  <span class="metric-label">Analyzed Files</span>
+                </div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-icon" style="background: rgba(99, 102, 241, 0.15); color: var(--accent-indigo);">💻</div>
+                <div class="metric-info">
+                  <span class="metric-value" id="dash-loc-count">0</span>
+                  <span class="metric-label">Lines of Code</span>
+                </div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-icon" style="background: rgba(244, 63, 94, 0.15); color: var(--accent-rose);">🛡️</div>
+                <div class="metric-info">
+                  <span class="metric-value" id="dash-sec-count">0</span>
+                  <span class="metric-label">Security Findings</span>
+                </div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-icon" style="background: rgba(245, 158, 11, 0.15); color: var(--accent-amber);">🐛</div>
+                <div class="metric-info">
+                  <span class="metric-value" id="dash-bugs-count">0</span>
+                  <span class="metric-label">Quality & Bug Flags</span>
+                </div>
+              </div>
+
+              <div class="metric-card">
+                <div class="metric-icon" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald);">🏆</div>
+                <div class="metric-info">
+                  <span class="metric-value" id="dash-health-score">--/100</span>
+                  <span class="metric-label">Estimated Health Score</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Two-Column Overview -->
+            <div class="grid-two-col">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title"><span>ℹ️</span> Project Summary</h3>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
+                  <div><strong>Application Type:</strong> <span id="dash-app-type" class="text-muted">Loading...</span></div>
+                  <div><strong>Primary Language:</strong> <span id="dash-primary-lang" class="text-muted">Loading...</span></div>
+                  <div><strong>Detected Frameworks:</strong> <span id="dash-frameworks" class="text-muted">Loading...</span></div>
+                  <div><strong>Ingested Source:</strong> <span id="dash-source" class="text-muted">Loading...</span></div>
+                  <div><strong>Default Branch:</strong> <span id="dash-branch" class="text-muted">Loading...</span></div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title"><span>🌐</span> Language Distribution</h3>
+                </div>
+                <div id="dash-languages-list" style="display: flex; flex-direction: column; gap: 0.6rem;">
+                  <!-- Injected dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Recommendations Card -->
+            <div class="card" style="margin-bottom: 1.5rem;">
+              <div class="card-header">
+                <h3 class="card-title"><span>💡</span> Strategic Improvement Recommendations</h3>
+              </div>
+              <ul id="dash-recommendations-list" style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+                <!-- Injected dynamically -->
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. ADD REPOSITORY VIEW -->
+        <section id="view-add-repo" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title"><span>➕</span> Add Repository</h1>
+            <p class="page-description">Select how you would like to ingest your codebase for analysis.</p>
+          </div>
+
+          <div class="tabs-nav">
+            <button class="tab-btn active" data-tab="tab-url"><span>🔗</span> GitHub URL</button>
+            <button class="tab-btn" data-tab="tab-zip"><span>📦</span> Upload ZIP Archive</button>
+            <button class="tab-btn" data-tab="tab-files"><span>📄</span> Upload Files</button>
+          </div>
+
+          <!-- URL Tab -->
+          <div id="tab-url" class="tab-pane active">
+            <div class="card" style="max-width: 680px;">
+              <div class="card-header">
+                <h3 class="card-title">Public GitHub Repository</h3>
+              </div>
+              <form id="form-github-url">
+                <div class="form-group">
+                  <label class="form-label" for="input-github-url">Repository URL *</label>
+                  <input type="url" id="input-github-url" class="form-input" placeholder="https://github.com/expressjs/express" required>
+                  <span class="input-hint">Enter the full URL of any public GitHub repository.</span>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="input-github-branch">Branch (Optional)</label>
+                  <input type="text" id="input-github-branch" class="form-input" placeholder="main (defaults to repository default)">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="input-github-token">Personal Access Token (Optional)</label>
+                  <input type="password" id="input-github-token" class="form-input" placeholder="ghp_... for 5,000 requests/hr rate limits">
+                  <span class="input-hint">Unauthenticated requests are limited by GitHub to 60 req/hr.</span>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                  <button type="submit" id="btn-submit-github" class="btn btn-primary">
+                    <span>🚀</span> Ingest & Analyze
+                  </button>
+                  <button type="button" class="btn btn-secondary" onclick="document.getElementById('input-github-url').value='https://github.com/facebook/jest'">
+                    Try Sample (Jest)
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- ZIP Upload Tab -->
+          <div id="tab-zip" class="tab-pane" style="display: none;">
+            <div class="card" style="max-width: 680px;">
+              <div class="card-header">
+                <h3 class="card-title">Upload Repository ZIP</h3>
+              </div>
+              <div id="zip-dropzone" class="dropzone">
+                <div class="dropzone-icon">📦</div>
+                <h4 style="margin-bottom: 0.4rem;">Drag & drop your repository .zip file here</h4>
+                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">Safe extraction, Zip Slip protection, ignores binaries and node_modules.</p>
+                <input type="file" id="input-zip-file" accept=".zip" style="display: none;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('input-zip-file').click()">Browse Files</button>
+                <span id="zip-selected-filename" style="margin-top: 0.75rem; font-size: 0.82rem; color: var(--accent-cyan);"></span>
+              </div>
+              <div style="margin-top: 1.25rem;">
+                <button type="button" id="btn-submit-zip" class="btn btn-primary" disabled>
+                  <span>🚀</span> Upload & Analyze ZIP
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Individual Files Tab -->
+          <div id="tab-files" class="tab-pane" style="display: none;">
+            <div class="card" style="max-width: 680px;">
+              <div class="card-header">
+                <h3 class="card-title">Upload Individual Source Files</h3>
+              </div>
+              <div id="files-dropzone" class="dropzone">
+                <div class="dropzone-icon">📑</div>
+                <h4 style="margin-bottom: 0.4rem;">Select or drag multiple source code and config files</h4>
+                <p class="text-muted" style="font-size: 0.85rem; margin-bottom: 1rem;">Upload JS, TS, Python, JSON, YAML, HTML, CSS, Go, Rust, etc.</p>
+                <input type="file" id="input-multi-files" multiple style="display: none;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('input-multi-files').click()">Browse Multiple Files</button>
+                <span id="files-selected-count" style="margin-top: 0.75rem; font-size: 0.82rem; color: var(--accent-cyan);"></span>
+              </div>
+              <div style="margin-top: 1.25rem;">
+                <button type="button" id="btn-submit-files" class="btn btn-primary" disabled>
+                  <span>🚀</span> Upload & Analyze Files
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. REPOSITORY OVERVIEW VIEW -->
+        <section id="view-overview" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title"><span>ℹ️</span> Repository Overview</h1>
+            <p class="page-description">Detailed metadata, git configuration, and health check inspection.</p>
+          </div>
+
+          <div id="overview-empty" class="empty-state">
+            <div class="empty-icon">📂</div>
+            <h3 class="empty-title">No Active Repository</h3>
+            <p class="empty-subtitle">Load a repository first to inspect its detailed specifications.</p>
+            <button class="btn btn-primary" onclick="App.navigateTo('add-repo')">Add Repository</button>
+          </div>
+
+          <div id="overview-content" style="display: none;">
+            <div class="grid-two-col">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Repository Details</h3>
+                </div>
+                <table class="data-table">
+                  <tbody>
+                    <tr><td><strong>Repository Name</strong></td><td id="ov-name">--</td></tr>
+                    <tr><td><strong>Owner / Org</strong></td><td id="ov-owner">--</td></tr>
+                    <tr><td><strong>Source</strong></td><td id="ov-source">--</td></tr>
+                    <tr><td><strong>Default Branch</strong></td><td id="ov-branch">--</td></tr>
+                    <tr><td><strong>License</strong></td><td id="ov-license">--</td></tr>
+                    <tr><td><strong>Ingested At</strong></td><td id="ov-ingested">--</td></tr>
+                    <tr><td><strong>Remote URL</strong></td><td><a id="ov-url" href="#" target="_blank" rel="noopener">--</a></td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Repository Health Indicators</h3>
+                </div>
+                <div id="ov-health-indicators" style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.9rem;">
+                  <!-- Health badges injected dynamically -->
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top: 1.25rem;">
+              <div class="card-header">
+                <h3 class="card-title">Description</h3>
+              </div>
+              <p id="ov-description" style="color: var(--text-secondary); font-size: 0.92rem;">--</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. PROJECT STRUCTURE EXPLORER -->
+        <section id="view-structure" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title"><span>📁</span> Project Structure Explorer</h1>
+            <p class="page-description">Interactive tree navigator, file search, and read-only source viewer.</p>
+          </div>
+
+          <div id="structure-empty" class="empty-state">
+            <div class="empty-icon">📂</div>
+            <h3 class="empty-title">No Active Repository</h3>
+            <p class="empty-subtitle">Load a repository to explore its directory hierarchy and file contents.</p>
+            <button class="btn btn-primary" onclick="App.navigateTo('add-repo')">Add Repository</button>
+          </div>
+
+          <div id="structure-content" class="explorer-container" style="display: none;">
+            <div class="tree-panel">
+              <div class="tree-search-bar">
+                <input type="text" id="tree-search-input" class="form-input" placeholder="🔍 Filter files by name or extension...">
+              </div>
+              <div id="tree-nodes-container" class="tree-list">
+                <!-- Tree rendered dynamically -->
+              </div>
+            </div>
+
+            <div class="file-viewer-panel">
+              <div class="viewer-header">
+                <span class="viewer-filename" id="viewer-selected-filename">Select a file from the explorer to preview</span>
+                <div style="display: flex; gap: 0.5rem;">
+                  <button id="viewer-copy-btn" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.78rem;">Copy</button>
+                  <button id="viewer-download-btn" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.78rem;">Download</button>
+                </div>
+              </div>
+              <pre class="code-container"><code id="viewer-code-content">// Select a file from the tree to view its contents</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. CODE ANALYSIS VIEW -->
+        <section id="view-code-analysis" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title"><span>🔍</span> Code Analysis</h1>
+            <p class="page-description">Detailed inspections of entry points, complexity, maintainability, and architectural patterns.</p>
+          </div>
+
+          <div id="code-analysis-content">
+            <div class="card" style="margin-bottom: 1.5rem;">
+              <div class="card-header">
+                <h3 class="card-title"><span>🚀</span> Identified Entry Points & Core Handlers</h3>
+              </div>
+              <div id="ca-entrypoints-list" style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.88rem;">
+                <!-- Entrypoints injected dynamically -->
+              </div>
+            </div>
+
+            <div class="grid-two-col">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title"><span>⚙️</span> Architectural Classification</h3>
+                </div>
+                <div id="ca-arch-details" style="font-size: 0.9rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                  <!-- Architecture info injected dynamically -->
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title"><span>📊</span> Codebase Volume & Scale</h3>
+                </div>
+                <div id="ca-scale-details" style="font-size: 0.9rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                  <!-- Scale info injected dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. BUG REPORTS VIEW -->
+        <section id="view-bug-reports" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title"><span>🐛</span> Bug Reports & Code Quality Findings</h1>
+            <p class="page-description">Static detection of potential logic errors, exception mishandling, and code smells.</p>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
+            <button class="btn btn-secondary bug-filter-btn active" data-filter="all">All</button>
+            <button class="btn btn-secondary bug-filter-btn" data-filter="High">High</button>
+            <button class="btn btn-secondary bug-filter-btn" data-filter="Medium">Medium</button>
+            <button class="btn btn-secondary bug-filter-btn" data-filter="Low">Low</button>
+          </div>
+
+          <div id="bug-reports-list">
+            <!-- Bug cards rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- 7. SECURITY ANALYSIS VIEW -->
+        <section id="view-security" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title"><span>🛡️</span> Security Analysis & Credential Audit</h1>
+            <p class="page-description">Automated detection of exposed secrets, injection risks, and insecure coding patterns.</p>
+          </div>
+
+          <div id="security-reports-list">
+            <!-- Security cards rendered dynamically -->
+          </div>
+        </section>
+
+        <!-- 8. DEPENDENCIES VIEW -->
+        <section id="view-dependencies" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title"><span>📦</span> Dependency Analysis</h1>
+            <p class="page-description">Detected packages, manifest files, and ecosystem libraries.</p>
+          </div>
+
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+              <h3 class="card-title">Detected Manifest Files</h3>
+            </div>
+            <div id="deps-manifests-list" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+              <!-- Manifest badges injected -->
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Declared Dependencies</h3>
+              <input type="text" id="deps-search-input" class="form-input" style="max-width: 240px; padding: 0.35rem 0.65rem;" placeholder="Filter dependencies...">
+            </div>
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Package Name</th>
+                    <th>Declared Version</th>
+                    <th>Type</th>
+                    <th>Ecosystem</th>
+                    <th>Manifest Source</th>
+                  </tr>
+                </thead>
+                <tbody id="deps-table-body">
+                  <!-- Rows injected -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 9. DOCUMENTATION GENERATOR VIEW -->
+        <section id="view-doc-gen" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title"><span>📝</span> Documentation Generator</h1>
+            <p class="page-description">Generate, preview, copy, and download grounded Markdown documentation.</p>
+          </div>
+
+          <div class="tabs-nav">
+            <button class="tab-btn doc-tab-btn active" data-doctype="readme">README.md</button>
+            <button class="tab-btn doc-tab-btn" data-doctype="api">API Documentation</button>
+            <button class="tab-btn doc-tab-btn" data-doctype="project">Architecture & Design</button>
+            <button class="tab-btn doc-tab-btn" data-doctype="setup">Installation & Setup Guide</button>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span id="doc-active-title" style="font-weight: 600; font-family: var(--font-mono);">README.md</span>
+              <div style="display: flex; gap: 0.5rem;">
+                <button id="doc-regenerate-btn" class="btn btn-secondary">🔄 Regenerate</button>
+                <button id="doc-copy-btn" class="btn btn-secondary">📋 Copy</button>
+                <button id="doc-download-btn" class="btn btn-primary">📥 Download .md</button>
+              </div>
+            </div>
+            <div id="doc-preview-container" class="markdown-body" style="background-color: var(--bg-primary); padding: 1.5rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); max-height: 550px; overflow-y: auto;">
+              <!-- Markdown rendered here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 10. REPOSITORY CHATBOT VIEW -->
+        <section id="view-chatbot" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title"><span>💬</span> Repository-Aware Chatbot</h1>
+            <p class="page-description">Ask technical questions grounded in the repository source code and analysis results.</p>
+          </div>
+
+          <div class="chat-window">
+            <div class="quick-prompts" style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); background-color: var(--bg-tertiary);">
+              <span style="font-size: 0.76rem; color: var(--text-muted); align-self: center; margin-right: 0.5rem;">Suggested:</span>
+              <span class="quick-chip" onclick="App.askSuggestedQuestion('What does this repository do and what is its architecture?')">What does this project do?</span>
+              <span class="quick-chip" onclick="App.askSuggestedQuestion('Explain the main entry point and startup flow.')">Explain the entry point</span>
+              <span class="quick-chip" onclick="App.askSuggestedQuestion('What security issues or bugs were detected?')">What bugs were detected?</span>
+              <span class="quick-chip" onclick="App.askSuggestedQuestion('How can I run and test this application?')">How do I test this?</span>
+              <button class="btn btn-secondary" style="margin-left: auto; padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="App.clearChat()">Clear Chat</button>
+            </div>
+
+            <div id="chat-messages-container" class="chat-messages">
+              <!-- Messages rendered dynamically -->
+            </div>
+
+            <form id="chat-input-form" class="chat-input-bar">
+              <input type="text" id="chat-input-text" class="form-input" placeholder="Ask a question about this repository..." autocomplete="off">
+              <button type="submit" id="chat-send-btn" class="btn btn-primary">Send</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- 11. REPORTS VIEW -->
+        <section id="view-reports" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title"><span>📄</span> PDF Reports</h1>
+            <p class="page-description">Generate and download comprehensive, audit-ready PDF analysis reports.</p>
+          </div>
+
+          <div class="card" style="max-width: 720px;">
+            <div class="card-header">
+              <h3 class="card-title">Full Repository Audit Report</h3>
+              <button id="btn-download-pdf-view" class="btn btn-primary">
+                <span>📥</span> Download PDF Report
+              </button>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">
+              The generated PDF includes repository metadata, scope, executive summary, language breakdown, full bug reports, security vulnerability details, dependency listings, and prioritized recommendations.
+            </p>
+            <div style="background-color: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size: 0.85rem;">
+              <div><strong>Format:</strong> Standard A4 PDF Document</div>
+              <div><strong>Generation Engine:</strong> Server-Side PDFKit</div>
+              <div><strong>Status:</strong> Live repository data compiled dynamically</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 12. SETTINGS VIEW -->
+        <section id="view-settings" class="view-section">
+          <div class="page-header">
+            <h1 class="page-title"><span>⚙️</span> Settings & Configuration</h1>
+            <p class="page-description">Configure AI providers, GitHub authentication tokens, and inspect system diagnostics.</p>
+          </div>
+
+          <div class="grid-two-col">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">AI Provider Configuration</h3>
+              </div>
+              <form id="form-settings-ai">
+                <div class="form-group">
+                  <label class="form-label" for="settings-ai-provider">AI Provider</label>
+                  <select id="settings-ai-provider" class="form-select">
+                    <option value="gemini">Google Gemini (Recommended)</option>
+                    <option value="openai">OpenAI (GPT-4o, GPT-4o-mini)</option>
+                    <option value="heuristic">Offline Heuristic Engine Only</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="settings-ai-key">API Key</label>
+                  <input type="password" id="settings-ai-key" class="form-input" placeholder="Enter API key...">
+                  <span class="input-hint" id="settings-ai-key-status">Key is currently not set.</span>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="settings-ai-model">Model Name</label>
+                  <input type="text" id="settings-ai-model" class="form-input" placeholder="gemini-3.8-flash">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="settings-ai-baseurl">Custom Base URL (For Ollama/Local)</label>
+                  <input type="text" id="settings-ai-baseurl" class="form-input" placeholder="https://api.openai.com/v1">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="settings-github-token">GitHub Token (Increases rate limits to 5000/hr)</label>
+                  <input type="password" id="settings-github-token" class="form-input" placeholder="ghp_...">
+                  <span class="input-hint" id="settings-github-token-status">Token is currently not set.</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">Save Settings</button>
+              </form>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">System Health & Diagnostic</h3>
+              </div>
+              <table class="data-table">
+                <tbody>
+                  <tr><td><strong>Status</strong></td><td><span class="badge-blue" id="diag-status">healthy</span></td></tr>
+                  <tr><td><strong>Node.js Version</strong></td><td id="diag-node">--</td></tr>
+                  <tr><td><strong>Server Uptime</strong></td><td id="diag-uptime">--</td></tr>
+                  <tr><td><strong>Memory Usage</strong></td><td id="diag-memory">--</td></tr>
+                  <tr><td><strong>Ingested Repositories</strong></td><td id="diag-repos">--</td></tr>
+                </tbody>
+              </table>
+              <div style="margin-top: 1.5rem;">
+                <button class="btn btn-secondary" onclick="App.refreshDiagnostics()">🔄 Refresh Diagnostics</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- CODE FIX SUGGESTION MODAL -->
+  <div id="modal-code-fix" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-fix-title" style="font-size: 1.1rem; font-weight: 700;">Proposed Code Fix</h3>
+        <button class="btn-icon" onclick="UI.closeModal('modal-code-fix')">✖</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 1rem; padding: 0.75rem; background-color: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: var(--radius-sm); font-size: 0.84rem; color: var(--accent-cyan);">
+          ⚠️ <strong>Read-Only Advisory:</strong> This fix is a proposal. The original repository is strictly read-only and has not been modified.
+        </div>
+
+        <h4 style="font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">Original Code:</h4>
+        <pre class="evidence-box" id="modal-original-code" style="margin-bottom: 1rem;"></pre>
+
+        <h4 style="font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--accent-emerald);">Proposed Corrected Code:</h4>
+        <pre class="evidence-box" id="modal-proposed-code" style="color: #6ee7b7; border-color: #059669; margin-bottom: 1rem;"></pre>
+
+        <h4 style="font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">Explanation & Rationale:</h4>
+        <p id="modal-explanation" style="font-size: 0.88rem; color: var(--text-primary); margin-bottom: 1rem;"></p>
+
+        <h4 style="font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">Potential Side Effects:</h4>
+        <p id="modal-side-effects" style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;"></p>
+
+        <h4 style="font-size: 0.88rem; margin-bottom: 0.4rem; color: var(--text-secondary);">Suggested Verification Tests:</h4>
+        <p id="modal-suggested-tests" style="font-size: 0.88rem; color: var(--text-primary);"></p>
+      </div>
+      <div class="modal-footer">
+        <button id="modal-copy-fix-btn" class="btn btn-secondary">📋 Copy Fix</button>
+        <button id="modal-download-fix-btn" class="btn btn-secondary">📥 Download Fix File</button>
+        <button class="btn btn-primary" onclick="UI.closeModal('modal-code-fix')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
